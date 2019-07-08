@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  postgres:
+    restart: unless-stopped
+    image: postgres:alpine
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks: 
+      - backend
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.envs/.postgres
+
+  web:
+    restart: unless-stopped
+    build: 
+      context: .
+      dockerfile: ./docker/Dockerfile
+    image: carbon-django
+    volumes:
+     - .:/app
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+    depends_on:
+      - postgres
+    env_file: 
+      - ./.envs/.django
+
+networks:
+  backend:
+
+volumes:
+  pg-data:

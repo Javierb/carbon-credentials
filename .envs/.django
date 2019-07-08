@@ -1,0 +1,9 @@
+DJANGO_SETTINGS_MODULE=config.settings
+SECRET_KEY=Changeme!!
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE=carboncredentials
+SQL_USER=postgres
+SQL_PASSWORD=postgres
+SQL_HOST=postgres
+SQL_PORT=5432
+DATABASE_URL=postgres://postgres:postgres@postgres:5432/carboncredentials
