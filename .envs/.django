@@ -1,4 +1,4 @@
-DJANGO_SETTINGS_MODULE=config.settings
+DJANGO_ENVIRONMENT_MODE=development
 SECRET_KEY=Changeme!!
 SQL_ENGINE=django.db.backends.postgresql
 SQL_DATABASE=carboncredentials

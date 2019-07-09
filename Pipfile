@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 werkzeug = "*"
 django-debug-toolbar = "*"
+nplusone = "*"
 
 [packages]
 django = "*"
