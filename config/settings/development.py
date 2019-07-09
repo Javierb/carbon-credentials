@@ -22,7 +22,7 @@ MIDDLEWARE += [
 # nplusone should be the first
 MIDDLEWARE = ['nplusone.ext.django.NPlusOneMiddleware',] + MIDDLEWARE
 
-NPLUSONE_RAISE = True
+NPLUSONE_RAISE = False
 NPLUSONE_LOGGER = logging.getLogger('nplusone')
 NPLUSONE_LOG_LEVEL = logging.WARN
 
