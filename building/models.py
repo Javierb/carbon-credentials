@@ -40,3 +40,7 @@ class Energy(models.Model):
         db_table = 'energy'
         verbose_name = _('energy')
         verbose_name_plural = _('energy')
+        unique_together = ['meter', 'reading_date_time']
+
+
+

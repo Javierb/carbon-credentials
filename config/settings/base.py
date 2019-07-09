@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'building',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -120,3 +121,5 @@ STATIC_ROOT = os.path.join(ROOT_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(ROOT_DIR, 'media')
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True
