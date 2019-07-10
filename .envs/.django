@@ -1,5 +1,5 @@
 DJANGO_ENVIRONMENT_MODE=development
-SECRET_KEY=Changeme!!
+SECRET_KEY=ChangeME!'t=+vz3yu-865ti9gd8^_*^q6ka0l_c)=s6n!z1)$y(ov61g$+f'
 SQL_ENGINE=django.db.backends.postgresql
 SQL_DATABASE=carboncredentials
 SQL_USER=postgres
@@ -7,3 +7,6 @@ SQL_PASSWORD=postgres
 SQL_HOST=postgres
 SQL_PORT=5432
 DATABASE_URL=postgres://postgres:postgres@postgres:5432/carboncredentials
+MQ_HOST=rabbitmq
+MQ_PORT=5672
+RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//

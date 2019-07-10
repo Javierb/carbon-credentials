@@ -24,8 +24,7 @@ env = environ.Env()
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 't=+vz3yu-865ti9gd8^_*^q6ka0l_c)=s6n!z1)$y(ov61g$+f'
-
+SECRET_KEY = env('SECRET_KEY')
 
 # Application definition
 
@@ -122,4 +121,16 @@ STATIC_ROOT = os.path.join(ROOT_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(ROOT_DIR, 'media')
 
-IMPORT_EXPORT_USE_TRANSACTIONS = True
+IMPORT_EXPORT_USE_TRANSACTIONS = False
+IMPORT_EXPORT_SKIP_ADMIN_LOG = True
+
+CELERY_BROKER_URL = env('RABBITMQ_URL')
+
+# For RabbitMQ
+# BROKER_URL = 'amqp://[ipaddress]'
+# CELERY_RESULT_BACKEND = 'amqp://[ipaddress]'
+# Celery Data Format
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'Asia/Kolkata'

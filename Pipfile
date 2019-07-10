@@ -13,6 +13,8 @@ django = "*"
 psycopg2 = "*"
 django-environ = "*"
 django-import-export = "*"
+Celery = "*"
+django-celery-results = "*"
 
 [requires]
 python_version = "3.7"
