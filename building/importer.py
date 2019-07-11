@@ -49,7 +49,16 @@ class DataImporter:
 
     @classmethod
     def clean_row(cls, row):
-        return filter(None, row)
+        return list(filter(None, row))
+
+    def skip_instance(self, instance):
+        for field in instance._meta.fields:
+            # Id fields can be blank in creation scenarios.
+            if field.name != 'id':
+                val = field.value_from_object(instance)
+                if field.blank and val is None or val == '':
+                    return True
+        return False
 
     def import_file(self, file):
         logger.info(f'Importing data from the file: {file}')
@@ -65,7 +74,9 @@ class DataImporter:
                 for row in reader:
                     cleaned_row = self.clean_row(row)
                     object_dict = {key: value for key, value in zip(headers, cleaned_row)}
-                    objs.append(class_model(**object_dict))
+                    instance = class_model(**object_dict)
+                    if not self.skip_instance(instance):
+                        objs.append(instance)
                     if len(objs) == self.BATCH_SIZE:
                         class_model.objects.bulk_create(objs, self.BATCH_SIZE, ignore_conflicts=True)
                         objs = []
@@ -75,4 +86,4 @@ class DataImporter:
             except IntegrityError as e:
                 logger.error(f'The file {file} has already been imported and can\'t be imported again.')
             except Exception as e:
-                logger.error(e.message)
+                logger.error(e)
