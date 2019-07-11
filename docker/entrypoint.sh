@@ -28,6 +28,9 @@ until rabbitmq_ready; do
 done
 >&2 echo 'RabbitMQ is up - continuing...'
 
+>&2 echo "Starting a celery worker deatached!"
+celery -A config worker -l info &
+
 
 >&2 echo "Applying database migrations"
 python manage.py migrate
@@ -35,6 +38,7 @@ python manage.py migrate
 
 >&2 echo "Starting django dev server"
 python manage.py runserver 0.0.0.0:8000
+
 
 # Evaluating passed command (do not touch):
 # shellcheck disable=SC2086

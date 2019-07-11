@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'building',
     'import_export',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -125,6 +126,8 @@ IMPORT_EXPORT_USE_TRANSACTIONS = False
 IMPORT_EXPORT_SKIP_ADMIN_LOG = True
 
 CELERY_BROKER_URL = env('RABBITMQ_URL')
+CELERY_RESULT_BACKEND = 'django-db'
+
 
 # For RabbitMQ
 # BROKER_URL = 'amqp://[ipaddress]'
