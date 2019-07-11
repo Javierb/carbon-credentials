@@ -1,26 +1,21 @@
 from django.contrib import admin
-from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 from .models import Building, Meter, Energy
+from .resources import BuildingsResource, MeterResource, EnergyResource
 
 
-class BuildingsResource(resources.ModelResource):
+@admin.register(Building)
+class BuildingAdmin(ImportExportModelAdmin):
+    resource_class = BuildingsResource
 
-    class Meta:
-        model = Building
+@admin.register(Meter)
+class MeterAdmin(ImportExportModelAdmin):
+    resource_class = MeterResource
 
+@admin.register(Energy)
+class EnergyAdmin(ImportExportModelAdmin):
+    resource_class = EnergyResource
 
-class MeterResource(resources.ModelResource):
-
-    class Meta:
-        model = Meter
-
-
-class EnergyResource(resources.ModelResource):
-
-    class Meta:
-        model = Energy
-
-
-admin.site.register(Building)
-admin.site.register(Meter)
-admin.site.register(Energy)
+# admin.site.register(Building)
+# admin.site.register(Meter)
+# admin.site.register(Energy)
