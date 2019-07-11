@@ -5,4 +5,29 @@
 
 {% block header %}Buildings{% endblock %}
 
-{% block content %}Some content{% endblock %}
+{% block content %}
+
+
+<table class="table">
+    <caption>List of Buildings</caption>
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for building in object_list %}
+            <tr>
+                <td>{{building.id}}</td>
+                <td>{{building.name}}</td>
+                <td><a href="{% url 'meter-list' building.id %}">See metters</a></td>
+            </tr>
+        {% empty %}
+            <tr><td>There are no Buildings yet. You can import them <a href="{% url 'upload' %}">here</a></td>
+        {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}

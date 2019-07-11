@@ -1,5 +1,5 @@
 
-from django.views.generic import TemplateView
+from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -10,12 +10,51 @@ from .tasks import import_file_task
 import os
 from django.contrib import messages
 from itertools import islice
+from .models import Energy, Building, Meter
 
 
-
-class IndexView(TemplateView):
+class BuildingListView(ListView):
     template_name = "building/index.html"
-    
+    model = Building
+    paginate_by = 50
+
+
+class MeterListView(ListView):
+    template_name = "building/meter_list.html"
+    model = Meter
+    paginate_by = 50
+
+    def get_queryset(self):
+        queryset = self.model.objects.select_related('building')
+        building_id = self.kwargs['building_id']
+        if building_id:
+            queryset = queryset.filter(building_id=building_id)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['building'] = Building.objects.get(pk=self.kwargs['building_id'])
+        return context
+
+
+
+class EnergyListView(ListView):
+    template_name = "building/energy_list.html"
+    model = Energy
+    paginate_by = 500
+
+    def get_queryset(self):
+        queryset = self.model.objects.select_related('meter')
+        meter_id = self.kwargs['meter_id']
+        if meter_id:
+            queryset = queryset.filter(meter_id=meter_id)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['meter'] = Meter.objects.select_related('building').get(pk=self.kwargs['meter_id'])
+        return context
+
 
 def upload_file(request):
 
@@ -36,13 +75,9 @@ def upload_file(request):
             sample = None
 
             valid_data = DataImporter.match_data_model(file_path, 'building', model_name)
-                
-            print(valid_data)
             if valid_data:
                 # Async task to import the data.
                 import_file_task.delay(file_path, model_name)
-
-                # handle_uploaded_file(request.FILES['file'], request.POST['model'])
                 messages.info(request, 'We are importing the data! It will be available shortly.')
             else:
                 messages.warning(request, 'The data structure doesn\'t match with the selected model.')
