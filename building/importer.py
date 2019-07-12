@@ -1,15 +1,13 @@
-from django.apps import apps
-from .resources import BuildingsResource, MeterResource, EnergyResource
-from tablib import Dataset
-import logging
-from itertools import islice
-from .models import Energy
-from django.apps import apps
-import csv
+from django.utils import dateparse, timezone
+from django.db.models import DateTimeField
 from django.db import IntegrityError
+from django.apps import apps
+from .models import Energy
+import logging
+import csv
+
 
 logger = logging.getLogger(__name__)
-
 
 class DataImporter:
 
@@ -18,14 +16,6 @@ class DataImporter:
     def __init__(self, model):
         self.model = model
         self.this_app = apps.get_app_config('building')
-
-        if model.lower() in self.this_app.models.keys():
-            if model == 'building':
-                self.resource = BuildingsResource
-            elif model == 'meter':
-                self.resource = MeterResource
-            else:
-                self.resource = EnergyResource
 
     @classmethod
     def match_data_model(cls, file, app_name,  model_name):
@@ -38,14 +28,19 @@ class DataImporter:
        
         # object_dict = {key: value for key, value in zip(headers, filter(None, next(data_sample)))}
         object_dict = {key: value for key, value in zip(headers, row)}
-
+        
         try:
             class_model(**object_dict)
-
         except TypeError:
             return False
-
         return True
+
+    def make_timezone_aware(self, instance):
+        for f in instance._meta.fields:
+            if isinstance(f, DateTimeField):
+                fvalue = dateparse.parse_datetime(f.value_from_object(instance))
+                tzaware = timezone.make_aware(fvalue)
+                setattr(instance, f.name, tzaware)
 
     @classmethod
     def clean_row(cls, row):
@@ -61,7 +56,7 @@ class DataImporter:
         return False
 
     def import_file(self, file):
-        logger.info(f'Importing data from the file: {file}')
+        logger.info(f'Importing data in batchs from the file: {file}')
         with open(file, 'r') as f:
             reader = csv.reader(f, delimiter=',', quotechar='|')
             
@@ -76,13 +71,16 @@ class DataImporter:
                     object_dict = {key: value for key, value in zip(headers, cleaned_row)}
                     instance = class_model(**object_dict)
                     if not self.skip_instance(instance):
+                        self.make_timezone_aware(instance)
                         objs.append(instance)
                     if len(objs) == self.BATCH_SIZE:
+                        logger.info(f'Importing a batch of {self.BATCH_SIZE} instances.')
                         class_model.objects.bulk_create(objs, self.BATCH_SIZE, ignore_conflicts=True)
                         objs = []
-                    
                 if len(objs) > 0:
+                    logger.info(f'Importing a batch of {len(objs)} instances.')
                     class_model.objects.bulk_create(objs)
+
             except IntegrityError as e:
                 logger.error(f'The file {file} has already been imported and can\'t be imported again.')
             except Exception as e:
