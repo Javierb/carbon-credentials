@@ -1,16 +1,33 @@
 
 from django.views.generic.list import ListView
-from django.views.generic.edit import FormView
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.conf import settings
+from django.contrib import messages
+from django.db import connection
+from rest_framework import views
+from rest_framework.response import Response
 from .forms import UploadFileForm
 from .importer import DataImporter
-from django.conf import settings
 from .tasks import import_file_task
-import os
-from django.contrib import messages
-from itertools import islice
 from .models import Energy, Building, Meter
+import os
+
+
+class DataView(views.APIView):
+
+    def get(self, request, meter_id, format=None):
+        q = """SELECT  DATE(reading_date_time) as dd, SUM(consumption) 
+                FROM public.energy 
+                WHERE meter_id=%s 
+            GROUP BY dd
+            HAVING DATE(reading_date_time) = DATE(reading_date_time)
+            ORDER BY dd;"""
+
+        with connection.cursor() as cursor:
+            cursor.execute(q, (meter_id,))
+            data = cursor.fetchall()
+        
+        return Response(data)
 
 
 class BuildingListView(ListView):
@@ -35,7 +52,6 @@ class MeterListView(ListView):
         context = super().get_context_data(**kwargs)
         context['building'] = Building.objects.get(pk=self.kwargs['building_id'])
         return context
-
 
 
 class EnergyListView(ListView):
@@ -64,7 +80,6 @@ def upload_file(request):
             for chunk in f.chunks():
                 destination.write(chunk)
         return file_path
-        
 
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
