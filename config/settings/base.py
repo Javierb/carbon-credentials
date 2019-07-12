@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'building',
     'import_export',
     'django_celery_results',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -128,12 +129,8 @@ IMPORT_EXPORT_SKIP_ADMIN_LOG = True
 CELERY_BROKER_URL = env('RABBITMQ_URL')
 CELERY_RESULT_BACKEND = 'django-db'
 
-
-# For RabbitMQ
-# BROKER_URL = 'amqp://[ipaddress]'
-# CELERY_RESULT_BACKEND = 'amqp://[ipaddress]'
-# Celery Data Format
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Asia/Kolkata'
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+    ]
+}
