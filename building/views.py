@@ -75,7 +75,9 @@ class EnergyListView(ListView):
 def upload_file(request):
 
     def handle_uploaded_file(f):
+        os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
         file_path = os.path.join(settings.MEDIA_ROOT, f.name)
+
         with open(file_path, 'wb+') as destination:
             for chunk in f.chunks():
                 destination.write(chunk)
