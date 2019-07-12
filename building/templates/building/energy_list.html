@@ -3,64 +3,155 @@
 
 {% block title %}Energy{% endblock %}
 
+{% block css %}
+{{ block.super }}
+
+<link href="{% static 'css/chartist.min.css' %}" rel="stylesheet"></link>
+{% endblock %}
+
 {% block header %} {{ meter.fuel }} Consumption for {{meter.building.name }}{% endblock %}
 
 {% block content %}
 
+<p>{{ meter.unit }}</p>
+<div id="my-chart"></div>
 
 <table class="table">
-    <caption>Energy Consumption</caption>
-    <thead>
-      <tr>
-        <th scope="col">Consumption</th>
-        <th scope="col">Date</th>
-      </tr>
-    </thead>
-    <tbody>
-        {% for energy in object_list %}
-            <tr>
-                <td>{{energy.consumption}} {{energy.meter.unit}}</td>
-                <td>{{energy.reading_date_time}}</td>
-            </tr>
-        {% empty %}
-            <tr><td>There are no consumption data for this meter. You can import them <a href="{% url 'upload' %}">here</a></td>
-        {% endfor %}
-    </tbody>
-  </table>
-
-
-  {% if is_paginated %}
-  <nav aria-label="...">
-    <ul class="pagination">
-      {% if page_obj.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" tabindex="-1">Previous</a>
-      </li>
-      {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" href="" tabindex="-1">Previous</a>
-      </li>
-      {% endif %}
-      {% for i in paginator.page_range %}
-      {% if page_obj.number == i %}
-      <li class="page-item active">
-        <a class="page-link" href="#">{{ i }} <span class="sr-only">(current)</span></a>
-      </li>
-      {% else %}
-      <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-      {% endif %}
+  <caption>Energy Consumption</caption>
+  <thead>
+    <tr>
+      <th scope="col">Consumption</th>
+      <th scope="col">Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for energy in object_list %}
+    <tr>
+      <td>{{energy.consumption}} {{energy.meter.unit}}</td>
+      <td>{{energy.reading_date_time}}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td>There are no consumption data for this meter. You can import them <a href="{% url 'upload' %}">here</a></td>
       {% endfor %}
-      {% if page_obj.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-      </li>
-      {% else %}
-      <li class="page-item disabled">
-        <a class="page-link" href="">Next</a>
-      </li>
-      {% endif %}
-    </ul>
-  </nav>
-  {% endif %}
+  </tbody>
+</table>
+
+
+{% if is_paginated %}
+<nav aria-label="...">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}" tabindex="-1">Previous</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <a class="page-link" href="" tabindex="-1">Previous</a>
+    </li>
+    {% endif %}
+    {% for i in paginator.page_range %}
+    {% if page_obj.number == i %}
+    <li class="page-item active">
+      <a class="page-link" href="#">{{ i }} <span class="sr-only">(current)</span></a>
+    </li>
+    {% else %}
+    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+    {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <a class="page-link" href="">Next</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+{{ block.super }}
+
+<script src="{% static 'js/chartist.min.js' %}"></script>
+
+<script>
+
+  $(document).ready(function () {
+
+    var meter_id = "{{ meter.id }}";
+    var fuel = "{{ meter.fuel }}";
+
+    var chartData = {
+      labels: [],
+      series: [
+        {
+          data: []
+        }
+      ]
+    };
+
+    /* Set some base options (settings will override the default settings in Chartist.js *see default settings*). We are adding a basic label interpolation function for the xAxis labels. */
+    var options = {
+      axisX: {
+        labelInterpolationFnc: function (value) {
+          return value;
+        }
+      }
+    };
+
+    /* Now we can specify multiple responsive settings that will override the base settings based on order and if the media queries match. In this example we are changing the visibility of dots and lines as well as use different label interpolations for space reasons. */
+    var responsiveOptions = [
+      ['screen and (min-width: 641px) and (max-width: 1024px)', {
+        showPoint: false,
+        axisX: {
+          labelInterpolationFnc: function (value) {
+            return 'Week ' + value;
+          }
+        }
+      }],
+      ['screen and (max-width: 640px)', {
+        showLine: false,
+        axisX: {
+          labelInterpolationFnc: function (value) {
+            return 'W' + value;
+          }
+        }
+      }]
+    ];
+
+    fetch('http://localhost:8000/api/daily-data/' + meter_id + '/')
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (json_data) {
+        console.log(json_data);
+        var consumptions = [];
+        var dates = [];
+
+        for (i in json_data) {
+          consumptions.push(json_data[i][1]);
+
+          dates.push(json_data[i][0]);
+        }
+        chartData.series[0].data = consumptions;
+        chartData.labels = dates;
+        console.log(consumptions)
+        console.log(chartData.series[0].data);
+
+        console.log(JSON.stringify(json_data));
+        console.log(json_data);
+
+        /* Initialize the chart with the above settings */
+        new Chartist.Line('#my-chart', chartData, options, responsiveOptions);
+      });
+
+  });
+
+</script>
 
 {% endblock %}
