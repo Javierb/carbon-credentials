@@ -10,3 +10,4 @@ DATABASE_URL=postgres://postgres:postgres@postgres:5432/carboncredentials
 MQ_HOST=rabbitmq
 MQ_PORT=5672
 RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+SQLITE_URL=sqlite://../dbtesting.db
