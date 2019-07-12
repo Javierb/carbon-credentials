@@ -34,6 +34,11 @@ Clone the repository from github and start the services with docker compose.
 - JQuery
 - ChartistJS
 
+## Features
+- CSV import: Async import with Celery and RabbitMQ. Also in the Admin side there is an import export integration of django-impor-export (It's syncronous and will time out for large files).
+- Data display for the 3 models
+- Simple chart: Asyncronously the front-end gets the data from a REST end point and displays a daily aggregation of consumption per meter. 
+
 ## Possible improvements
 - Cosmetic improvements.
 - Front-end framework integration.
