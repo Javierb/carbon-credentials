@@ -1,10 +1,11 @@
--i https://pypi.org/simple
--r ./base.txt
+-i https://pypi.org/simple/
+asgiref==3.3.4
 blinker==1.4
 django-debug-toolbar==2.0
-django==2.2.3
+django==2.2.22
 nplusone==1.0.0
-pytz==2019.1
-six==1.12.0
-sqlparse==0.3.0
+pytz==2021.1
+six==1.16.0
+sqlparse==0.4.1
+typing-extensions==3.10.0.0 ; python_version < '3.8'
 werkzeug==0.15.4
